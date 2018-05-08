@@ -1,5 +1,7 @@
-var currentLVL = 1;
+var currentLVL = 0;
+var walls = [];
 var blocks = [];
+var player;
 
 var gameArea = {
     canvas: document.createElement("canvas"),
@@ -18,21 +20,21 @@ var gameArea = {
 
                 switch (mapsArray[currentLVL].mapGrid[index][index2].toString()) {
                     case "W":
-                        blocks.push(new wallBlock(30, 30, "red", index2 * 30, index * 30));
+                        walls.push(new wallBlock(30, 30, "red", index2 * 30, index * 30));
                         console.log("Woop");
                         break;
                     case "G":
-                        blocks.push(new wallBlock(30, 30, "yellow", index2 * 30, index * 30));
+                        walls.push(new wallBlock(30, 30, "yellow", index2 * 30, index * 30));
                         console.log("Goop");
                         break;
 
                     case "B":
-                        blocks.push(new wallBlock(30, 30, "green", index2 * 30, index * 30));
+                        blocks.push(new moveBlock(30, 30, "green", index2 * 30, index * 30));
                         console.log("Bloop");
                         break;
 
                     case "P":
-                        blocks.push(new playerBlock(30, 30, "blue", index2 * 30, index * 30));
+                        player = new playerBlock(30, 30, "blue", index2 * 30, index * 30);
                         console.log("Ploop");
                         break;
 
@@ -70,6 +72,19 @@ function wallBlock(width, height, color, x, y) {
     }
 }
 
+function moveBlock(width, height, color, x, y) {
+    this.width = width;
+    this.height = height;
+    this.color = color;
+    this.x = x;
+    this.y = y;
+    this.update = function () {
+        ctx = gameArea.context;
+        ctx.fillStyle = color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
 function playerBlock(width, height, color, x, y) {
     this.width = width;
     this.height = height;
@@ -78,6 +93,20 @@ function playerBlock(width, height, color, x, y) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
+
+    this.move = function (){
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = intersectingObject.x;
+        var otherright = intersectingObject.x + (intersectingObject.width);
+        var othertop = intersectingObject.y;
+        var otherbottom = intersectingObject.y + (intersectingObject.height);
+
+
+    }
+
     this.update = function () {
         ctx = gameArea.context;
         ctx.fillStyle = color;
@@ -87,7 +116,7 @@ function playerBlock(width, height, color, x, y) {
         this.x += this.speedX;
         this.y += this.speedY;
 
-       // gameArea.key = false;
+        gameArea.key = false;
     }
 
 }
@@ -98,8 +127,11 @@ function startGame() {
 
 function updateGameArea() {
     gameArea.clear();
-    playerBlock.speedX = 0;
-    playerBlock.speedY = 0;
+    player.speedX = 0;
+    player.speedY = 0;
+    for (i = 0; i < walls.length; i++) {
+        walls[i].update();
+    }
     for (i = 0; i < blocks.length; i++) {
         blocks[i].update();
     }
@@ -107,12 +139,8 @@ function updateGameArea() {
     if (gameArea.key && gameArea.key == 68 || gameArea.key && gameArea.key == 39) { player.speedX = 30; }
     if (gameArea.key && gameArea.key == 87 || gameArea.key && gameArea.key == 38) { player.speedY = -30; }
     if (gameArea.key && gameArea.key == 83 || gameArea.key && gameArea.key == 40) { player.speedY = 30; }
-    playerBlock.newPos();
-    playerBlock.update();
+    
+    player.newPos();
+    player.update();
 
 }
-
-        /*for (let index = 0; index < blocks.length; index++) {
-            blocks[index].update();
-            
-        }*/

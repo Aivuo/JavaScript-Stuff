@@ -33,7 +33,7 @@ var gameArea = {
                         //console.log("Woop");
                         break;
                     case "G":
-                        blocks2.push(new allBlocks(30, 30, "yellow", index2 * 30, index * 30, index2, index, "goal"));
+                        goals.push(new allBlocks(30, 30, "yellow", index2 * 30, index * 30, index2, index, "goal"));
                         //console.log("Goop");
                         break;
 
@@ -130,17 +130,19 @@ class allBlocks {
                 var otherX = blocks2[i].positionX;
                 var otherY = blocks2[i].positionY;
 
-                if (otherX == myX - 1 && otherY == myY) {
-                    this.collideLeft = true;
-                }
-                if (otherX == myX + 1 && otherY == myY) {
-                    this.collideRight = true;
-                }
-                if (otherY == myY - 1 && otherX == myX) {
-                    this.collideUp = true;
-                }
-                if (otherY == myY + 1 && otherX == myX) {
-                    this.collideDown = true;
+                if (blocks2[i].type != "goal") {
+                    if (otherX == myX - 1 && otherY == myY) {
+                        this.collideLeft = true;
+                    }
+                    if (otherX == myX + 1 && otherY == myY) {
+                        this.collideRight = true;
+                    }
+                    if (otherY == myY - 1 && otherX == myX) {
+                        this.collideUp = true;
+                    }
+                    if (otherY == myY + 1 && otherX == myX) {
+                        this.collideDown = true;
+                    }    
                 }
             }
         }
@@ -233,6 +235,9 @@ function updateGameArea() {
     gameArea.clear();
     player.speedX = 0;
     player.speedY = 0;
+    for (i = 0; i < goals.length; i++) {
+        goals[i].update();
+    }
     for (i = 0; i < blocks2.length; i++) {
         blocks2[i].update();
         //player.colliding(blocks2[i]);
@@ -246,9 +251,6 @@ function updateGameArea() {
 
     // for (i = 0; i < blocks.length; i++) {
     //     blocks[i].update();
-    // }
-    // for (i = 0; i < goals.length; i++) {
-    //     goals[i].update();
     // }
     player.move();
     player.newPos();

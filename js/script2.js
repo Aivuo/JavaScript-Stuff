@@ -23,7 +23,7 @@ var gameArea = {
 
 
 
-        //Går igenom hela arrayen och skriver ut allt i loggen.
+        //Går igenom hela arrayen och skaper ett obj för varje block.
         for (index = 0; index < mapsArray[currentLVL].mapGrid.length; index++) {
             for (index2 = 0; index2 < mapsArray[currentLVL].mapGrid[index].length; index2++) {
 
@@ -62,6 +62,10 @@ var gameArea = {
             gameArea.key = e.keyCode;
         })
 
+        for (var l = 0; l < blocks2.length; l++) {
+            blocks2[l].collide();
+        }
+
     },
     clear: function () {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -78,6 +82,11 @@ class allBlocks {
         this.y = y;
         this.positionX = indexX;
         this.positionY = indexY;
+
+        this.collideLeft = false;
+        this.collideRight = false;
+        this.collideUp = false;
+        this.collideDown = false;
         // console.log(this.positionX);
         // console.log(this.positionY);
         this.update = function () {
@@ -89,25 +98,52 @@ class allBlocks {
         this.move = function () {
             if (this.type == "move") {
                 if (this.positionX == player.positionX && this.positionY == player.positionY) {
-                    if (this.positionX < player.formerPositionX && this.positionY == player.formerPositionY) {
+                    if (this.positionX < player.formerPositionX && this.positionY == player.formerPositionY && this.collideLeft == false) {
                         this.x -= 30;
                         this.positionX -= 1;
                     }
-                    if (this.positionX > player.formerPositionX && this.positionY == player.formerPositionY) {
+                    if (this.positionX > player.formerPositionX && this.positionY == player.formerPositionY && this.collideRight == false) {
                         this.x += 30;
                         this.positionX += 1;
                     }
-                    if (this.positionY < player.formerPositionY && this.positionX == player.formerPositionX) {
+                    if (this.positionY < player.formerPositionY && this.positionX == player.formerPositionX  && this.collideUp == false) {
                         this.y -= 30;
                         this.positionY -= 1;
                     }
-                    if (this.positionY > player.formerPositionY && this.positionX == player.formerPositionX) {
+                    if (this.positionY > player.formerPositionY && this.positionX == player.formerPositionX && this.collideDown == false) {
                         this.y += 30;
                         this.positionY += 1;
                     }
+                    this.collideLeft = false;
+                    this.collideRight = false;
+                    this.collideUp = false;
+                    this.collideDown = false;
+
+                    //this.collide();
                 }
             }
         };
+        this.collide = function () {
+            for (var i = 0; i < blocks2.length; i++) {
+                var myX = this.positionX;
+                var myY = this.positionY;
+                var otherX = blocks2[i].positionX;
+                var otherY = blocks2[i].positionY;
+
+                if (otherX == myX - 1 && otherY == myY) {
+                    this.collideLeft = true;
+                }
+                if (otherX == myX + 1 && otherY == myY) {
+                    this.collideRight = true;
+                }
+                if (otherY == myY - 1 && otherX == myX) {
+                    this.collideUp = true;
+                }
+                if (otherY == myY + 1 && otherX == myX) {
+                    this.collideDown = true;
+                }
+            }
+        }
     }
 }
 
@@ -129,7 +165,7 @@ class playerBlock {
             var myY = this.positionY;
             var otherX = intersectingObject.positionX;
             var otherY = intersectingObject.positionY;
-            
+
             if (intersectingObject.type == "wall") {
                 if (otherX == myX - 1 && otherY == myY) {
                     collideLeft = true;
@@ -199,6 +235,12 @@ function updateGameArea() {
     player.speedY = 0;
     for (i = 0; i < blocks2.length; i++) {
         blocks2[i].update();
+        //player.colliding(blocks2[i]);
+    }
+    for (i = 0; i < blocks2.length; i++) {
+        blocks2[i].collide();
+    }
+    for (i = 0; i < blocks2.length; i++) {
         player.colliding(blocks2[i]);
     }
 

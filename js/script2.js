@@ -1,9 +1,11 @@
 var currentLVL = 0;
-var walls = [];
-var blocks = [];
+
 var goals = [];
 var blocks2 = [];
 var player;
+
+var goalBlocks = 0;
+var won = 0;
 
 var collideLeft = false;
 var collideRight = false;
@@ -20,6 +22,7 @@ var gameArea = {
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.interval = setInterval(updateGameArea, 20);
+        currentLVL = Math.floor(Math.random() * 3);
 
 
 
@@ -34,6 +37,7 @@ var gameArea = {
                         break;
                     case "G":
                         goals.push(new allBlocks(30, 30, "yellow", index2 * 30, index * 30, index2, index, "goal"));
+                        goalBlocks += 1;
                         //console.log("Goop");
                         break;
 
@@ -69,6 +73,9 @@ var gameArea = {
     },
     clear: function () {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    stop: function () {
+        clearInterval(this.interval);
     }
 }
 
@@ -106,7 +113,7 @@ class allBlocks {
                         this.x += 30;
                         this.positionX += 1;
                     }
-                    if (this.positionY < player.formerPositionY && this.positionX == player.formerPositionX  && this.collideUp == false) {
+                    if (this.positionY < player.formerPositionY && this.positionX == player.formerPositionX && this.collideUp == false) {
                         this.y -= 30;
                         this.positionY -= 1;
                     }
@@ -114,13 +121,13 @@ class allBlocks {
                         this.y += 30;
                         this.positionY += 1;
                     }
-                    this.collideLeft = false;
-                    this.collideRight = false;
-                    this.collideUp = false;
-                    this.collideDown = false;
-
-                    //this.collide();
                 }
+                this.collideLeft = false;
+                this.collideRight = false;
+                this.collideUp = false;
+                this.collideDown = false;
+
+                this.collide();
             }
         };
         this.collide = function () {
@@ -129,6 +136,11 @@ class allBlocks {
                 var myY = this.positionY;
                 var otherX = blocks2[i].positionX;
                 var otherY = blocks2[i].positionY;
+
+                // this.collideLeft = false;
+                // this.collideRight = false;
+                // this.collideUp = false;
+                // this.collideDown = false;
 
                 if (blocks2[i].type != "goal") {
                     if (otherX == myX - 1 && otherY == myY) {
@@ -142,7 +154,7 @@ class allBlocks {
                     }
                     if (otherY == myY + 1 && otherX == myX) {
                         this.collideDown = true;
-                    }    
+                    }
                 }
             }
         }
@@ -168,18 +180,42 @@ class playerBlock {
             var otherX = intersectingObject.positionX;
             var otherY = intersectingObject.positionY;
 
-            if (intersectingObject.type == "wall") {
+            if (intersectingObject.type == "wall" || intersectingObject.type == "move") {
                 if (otherX == myX - 1 && otherY == myY) {
-                    collideLeft = true;
+                    if (intersectingObject.type == "wall") {
+                        collideLeft = true;
+                    } else {
+                        if (intersectingObject.collideLeft == true) {
+                            collideLeft = true;
+                        }
+                    }
                 }
                 if (otherX == myX + 1 && otherY == myY) {
-                    collideRight = true;
+                    if (intersectingObject.type == "wall") {
+                        collideRight = true;
+                    } else {
+                        if (intersectingObject.collideRight == true) {
+                            collideRight = true;
+                        }
+                    }
                 }
                 if (otherY == myY - 1 && otherX == myX) {
-                    collideUp = true;
+                    if (intersectingObject.type == "wall") {
+                        collideUp = true;
+                    } else {
+                        if (intersectingObject.collideUp == true) {
+                            collideUp = true;
+                        }
+                    }
                 }
                 if (otherY == myY + 1 && otherX == myX) {
-                    collideDown = true;
+                    if (intersectingObject.type == "wall") {
+                        collideDown = true;
+                    } else {
+                        if (intersectingObject.collideDown == true) {
+                            collideDown = true;
+                        }
+                    }
                 }
             }
         };
@@ -227,6 +263,14 @@ class playerBlock {
     }
 }
 
+function wonGame(incomingBlock) {
+        for (j = 0; j < goals.length; j++) {    
+            if (goals[j].positionX == incomingBlock.positionX && goals[j].positionY == incomingBlock.positionY) {
+                won += 1;
+            }
+        }       
+}
+
 function startGame() {
     gameArea.start();
 }
@@ -240,11 +284,19 @@ function updateGameArea() {
     }
     for (i = 0; i < blocks2.length; i++) {
         blocks2[i].update();
-        //player.colliding(blocks2[i]);
+        if (blocks2[i].type == "move") {
+            wonGame(blocks2[i])
+        }
     }
-    for (i = 0; i < blocks2.length; i++) {
-        blocks2[i].collide();
+
+    if (won == goalBlocks) {
+        gameArea.stop();
+    } else {
+        won = 0;
     }
+    // for (i = 0; i < blocks2.length; i++) {
+    //     blocks2[i].collide();
+    // }
     for (i = 0; i < blocks2.length; i++) {
         player.colliding(blocks2[i]);
     }

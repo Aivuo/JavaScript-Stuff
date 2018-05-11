@@ -17,12 +17,13 @@ var ctx;
 var gameArea = {
     canvas: document.createElement("canvas"),
     start: function () {
-        this.canvas.width = 570;
-        this.canvas.height = 480;
+        currentLVL = Math.floor(Math.random() * mapsArray.length);
+        this.canvas.width = mapsArray[currentLVL].mapGrid[0].length * 30;
+        this.canvas.height = mapsArray[currentLVL].mapGrid.length * 30;
         this.context = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.interval = setInterval(updateGameArea, 20);
-        currentLVL = Math.floor(Math.random() * 3);
+        
 
 
 
